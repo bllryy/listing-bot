@@ -6,7 +6,6 @@ A comprehensive multi-tenant Discord marketplace platform for selling digital it
 ![Node.js](https://img.shields.io/badge/Node.js-16+-green.svg)
 ![Discord](https://img.shields.io/badge/Discord-py--cord-7289da.svg)
 ![React](https://img.shields.io/badge/React-18-61dafb.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ## Table of Contents
 
@@ -116,67 +115,13 @@ All commands should return version numbers without errors.
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/Listing-Bot.git
+git clone [https://github.com/your-username/Listing-Bot.git](https://github.com/bllryy/listing-bot.git)
 cd Listing-Bot
 ```
 
 ### Step 2: Set Up the Discord Bot
 
-#### 2.1 Create a Python Virtual Environment
-
-```bash
-cd listing-bot
-
-# Create virtual environment
-python -m venv venv
-
-# Activate it (choose your OS)
-
-# Windows (Command Prompt):
-venv\Scripts\activate.bat
-
-# Windows (PowerShell):
-.\venv\Scripts\Activate.ps1
-
-# macOS/Linux:
-source venv/bin/activate
-```
-
-#### 2.2 Install Python Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-#### 2.3 Create the Environment File
-
-Copy the example environment file and edit it with your values:
-
-```bash
-# Copy the example file
-cp env.example listing-bot/.env
-```
-
-Edit the `.env` file in the `listing-bot/` directory with your settings:
-
-```env
-# Discord bot token (required)
-TOKEN=your_discord_bot_token_here
-
-# Server configuration - use your server's IP address
-# For local development, use 127.0.0.1
-# For production, use your server's actual IP (e.g., 192.168.1.100)
-SERVER_HOST=127.0.0.1
-BOT_SERVICE_HOST=127.0.0.1
-PARENT_API_HOST=127.0.0.1
-PARENT_API_PORT=7000
-
-# If you have a Skyblock data API running
-SKYBLOCK_API_HOST=127.0.0.1
-SKYBLOCK_API_PORT=3002
-```
-
-Replace `your_discord_bot_token_here` with your actual Discord bot token (see Step 3).
+- Check the docker help files
 
 ### Step 3: Create a Discord Application
 
