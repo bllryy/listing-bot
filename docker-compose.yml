@@ -1,0 +1,204 @@
+version: '3.8'
+
+services:
+  # Parent API - Main gateway/coordination service
+  parent-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.parent
+    container_name: listing-bot-parent-api
+    ports:
+      - "${PARENT_API_PORT:-8000}:8000"
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - BOT_SERVICE_HOST=listing-bot
+      - SHOP_FRONTEND_HOST=shop-sites
+      - SHOP_FRONTEND_PORT=7878
+      - PYTHONUNBUFFERED=1
+      - API_KEY=${API_KEY}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+    env_file:
+      - .env
+    volumes:
+      - ./parent_api:/app
+      - parent-api-data:/app/data
+    depends_on:
+      - redis
+    networks:
+      - listing-bot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # AI API Service
+  ai-api:
+    build:
+      context: ./ai_api
+      dockerfile: Dockerfile
+    container_name: listing-bot-ai-api
+    ports:
+      - "${AI_API_PORT:-8001}:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY}
+    env_file:
+      - .env
+    volumes:
+      - ./ai_api:/app
+      - ai-api-data:/app/data
+    networks:
+      - listing-bot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Main Discord Bot
+  listing-bot:
+    build:
+      context: ./listing-bot
+      dockerfile: Dockerfile
+    container_name: listing-bot-main
+    ports:
+      - "${BOT_PORT:-8002}:8002"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_HOST=parent-api
+      - API_PORT=8000
+      - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - .env
+    volumes:
+      - ./listing-bot:/app
+      - ./parent_api/ports.json:/app/ports.json
+      - bot-data:/app/data
+    depends_on:
+      - parent-api
+      - redis
+    networks:
+      - listing-bot-network
+    restart: unless-stopped
+
+  # Logger Site
+  logger-site:
+    build:
+      context: ./logger-site
+      dockerfile: Dockerfile
+    container_name: listing-bot-logger
+    ports:
+      - "${LOGGER_PORT:-8003}:8003"
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./logger-site:/app
+      - logger-data:/app/data
+    networks:
+      - listing-bot-network
+    restart: unless-stopped
+
+  # Listing Bot Dashboard (React + Express)
+  listing-bot-dashboard:
+    build:
+      context: ./listing-bot-dashboard
+      dockerfile: Dockerfile
+    container_name: listing-bot-dashboard
+    ports:
+      - "${DASHBOARD_PORT:-3000}:3000"
+    environment:
+      - REACT_APP_API_URL=http://${API_HOST:-localhost}:${PARENT_API_PORT:-8000}
+      - NODE_ENV=${NODE_ENV:-production}
+    env_file:
+      - .env
+    volumes:
+      - ./listing-bot-dashboard/public:/app/public:ro
+    depends_on:
+      parent-api:
+        condition: service_healthy
+    networks:
+      - listing-bot-network
+    restart: unless-stopped
+
+  # Seller Dashboard (React + Express)
+  seller-dashboard:
+    build:
+      context: ./seller_dashboard
+      dockerfile: Dockerfile
+    container_name: listing-bot-seller-dashboard
+    ports:
+      - "${SELLER_DASHBOARD_PORT:-3001}:3001"
+    environment:
+      - REACT_APP_API_URL=http://${API_HOST:-localhost}:${PARENT_API_PORT:-8000}
+      - NODE_ENV=${NODE_ENV:-production}
+    env_file:
+      - .env
+    volumes:
+      - ./seller_dashboard/public:/app/public:ro
+    depends_on:
+      parent-api:
+        condition: service_healthy
+    networks:
+      - listing-bot-network
+    restart: unless-stopped
+
+  # Shop Sites (React + Express)
+  shop-sites:
+    build:
+      context: ./shop-sites
+      dockerfile: Dockerfile
+    container_name: listing-bot-shop-sites
+    ports:
+      - "${SHOP_PORT:-7878}:7878"
+    environment:
+      - REACT_APP_API_URL=http://${API_HOST:-localhost}:${PARENT_API_PORT:-8000}
+      - PORT=7878
+      - NODE_ENV=${NODE_ENV:-production}
+    env_file:
+      - .env
+    volumes:
+      - ./shop-sites/public:/app/public:ro
+    depends_on:
+      parent-api:
+        condition: service_healthy
+    networks:
+      - listing-bot-network
+    restart: unless-stopped
+
+  # Redis for caching/sessions
+  redis:
+    image: redis:7-alpine
+    container_name: listing-bot-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - listing-bot-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis-data:
+  parent-api-data:
+  ai-api-data:
+  bot-data:
+  logger-data:
+
+networks:
+  listing-bot-network:
+    driver: bridge

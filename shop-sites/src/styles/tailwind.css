@@ -1,0 +1,238 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+body {
+  background-color: #191919;
+  color: white;
+}
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.8); /* slate-900 with opacity */
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #a855f7, #ec4899); /* purple-500 to pink-500 */
+  border-radius: 10px;
+  border: 2px solid rgba(15, 23, 42, 0.8);
+  box-shadow: inset 0 0 6px rgba(168, 85, 247, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #9333ea, #db2777); /* purple-600 to pink-600 */
+  box-shadow: inset 0 0 6px rgba(168, 85, 247, 0.5);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, #7c3aed, #be185d); /* purple-700 to pink-700 */
+}
+
+::-webkit-scrollbar-corner {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #a855f7 rgba(15, 23, 42, 0.8);
+}
+
+/* Mobile-first responsive improvements */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Mobile specific styles */
+@media (max-width: 640px) {
+  /* Prevent horizontal scroll and ensure full width */
+  * {
+    max-width: 100vw;
+  }
+  
+  /* Font size improvements for mobile */
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.125rem !important; }
+  h4 { font-size: 1rem !important; }
+  
+  /* Button text sizing */
+  button {
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  /* Card content adjustments */
+  .card-title {
+    font-size: 1rem !important;
+  }
+  
+  .stat-number {
+    font-size: 1.125rem !important;
+  }
+  
+  /* Grid adjustments - force single column on mobile */
+  .mobile-single-col {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Padding adjustments for mobile */
+  .mobile-padding {
+    padding: 0.75rem !important;
+  }
+  
+  /* Margin adjustments */
+  .mobile-margin {
+    margin: 0.5rem !important;
+  }
+  
+  /* Container width adjustments */
+  .container-mobile {
+    width: 100% !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  
+  .tablet-padding {
+    padding: 1rem;
+  }
+}
+
+/* Touch-friendly interactive elements */
+button, a, input, select {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+/* Scrollbar for specific containers with glass-morphism effect */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.7), rgba(236, 72, 153, 0.7));
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.8), rgba(219, 39, 119, 0.8));
+}
+
+/* Custom Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gradient-x {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(168, 85, 247, 0.8);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out;
+  animation-fill-mode: both;
+}
+
+.animate-slide-up-fade {
+  animation: slide-up-fade 0.5s ease-out;
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Improve text readability on mobile */
+@media (max-width: 640px) {
+  p, span, div {
+    line-height: 1.5;
+  }
+  
+  /* Smaller spacing for mobile */
+  .space-mobile > * + * {
+    margin-top: 0.5rem;
+  }
+}

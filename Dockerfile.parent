@@ -1,0 +1,24 @@
+# Parent API Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY parent_api/requirements.txt . 2>/dev/null || echo "from fastapi import FastAPI\nfrom fastapi.responses import HTMLResponse\nimport uvicorn\nimport os\nfrom dotenv import load_dotenv\n\nload_dotenv()\napp = FastAPI()\n\n@app.get('/')\ndef root():\n    return {'status': 'ok'}\n\nif __name__ == '__main__':\n    uvicorn.run(app, host='0.0.0.0', port=8000)" > requirements.txt
+
+# Install Python dependencies
+RUN pip install --no-cache-dir fastapi uvicorn python-dotenv aiohttp httpx
+
+# Copy application
+COPY parent_api /app
+
+EXPOSE 8000
+
+CMD ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Logs Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#070707',
+                            card: '#101010',
+                            hover: '#202020',
+                            settings: '#1a1a1a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .log-scroller {
+            /* Adjusted height to better fit the layout */
+            height: calc(100vh - 300px);
+            overflow-y: auto;
+        }
+        .log-entry.new {
+            background-color: rgba(79, 70, 229, 0.1);
+            transition: background-color 2s ease-out;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #3CEFFF, #46A3FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gradient-text-purple {
+            background: linear-gradient(90deg, #C04CFD, #7B68EE);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-dark-bg text-white min-h-screen font-sans">
+    <main class="w-[95%] mx-auto px-4 py-6">
+        <!-- Header -->
+    <div class="flex flex-row items-center justify-between mb-4 mt-6">
+        <div class="flex items-center">
+            <span class="bg-dark-card p-2 rounded-lg text-xl mr-3">📊</span>
+            <div>
+                <p class="text-2xl text-white">Live Logs</p>
+                <p id="status-text" class="text-[#aaa]">Monitor logs in real-time.</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <div id="status-indicator" class="bg-red-500 h-3 w-3 rounded-full"></div>
+                <span id="connection-status" class="font-medium text-red-500">Disconnected</span>
+            </div>
+            <button id="connect-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors text-sm w-28 text-center">
+                Connect
+            </button>
+        </div>
+    </div>
+
+        <!-- Log Views Container -->
+        <div>
+            <!-- Split View -->
+            <div id="split-view-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- Command Log Window -->
+                <div class="bg-dark-card rounded-xl p-5 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-indigo-400">💬</span>
+                            <p class="text-lg font-medium text-white">Command Logs</p>
+                        </div>
+                        <div>
+                            <span id="command-count" class="gradient-text font-semibold text-xl">0</span>
+                            <span class="text-[#aaa] text-sm ml-1">entries</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[#aaa] text-sm">Filter:</span>
+                            <select id="command-filter" class="bg-dark-settings text-white border border-gray-700 rounded-lg px-2 py-1 text-sm">
+                                <option value="all">All Commands</option>
+                            </select>
+                        </div>
+                        <button id="clear-commands-btn" class="bg-dark-settings hover:bg-dark-hover text-white px-3 py-1 rounded-lg transition-colors text-sm">Clear</button>
+                    </div>
+                    <div class="bg-dark-settings rounded-lg flex-grow overflow-y-auto log-scroller">
+                        <div id="commands-container" class="p-2 space-y-3">
+                            <p class="placeholder text-center p-6 text-gray-500">Connecting to see command logs...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Fetch Window -->
+                <div class="bg-dark-card rounded-xl p-5 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-purple-400">🔍</span>
+                            <p class="text-lg font-medium text-white">Data Fetches</p>
+                        </div>
+                        <div>
+                            <span id="fetch-count" class="gradient-text-purple font-semibold text-xl">0</span>
+                            <span class="text-[#aaa] text-sm ml-1">entries</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mb-2">
+                         <button id="clear-fetches-btn" class="bg-dark-settings hover:bg-dark-hover text-white px-3 py-1 rounded-lg transition-colors text-sm ml-auto">Clear</button>
+                    </div>
+                    <div class="bg-dark-settings rounded-lg flex-grow overflow-y-auto log-scroller">
+                        <table class="w-full">
+                            <thead class="bg-dark-card sticky top-0 z-10">
+                                <tr>
+                                    <th class="text-left p-3 border-b border-gray-800 text-[#aaa] font-medium text-sm">Time</th>
+                                    <th class="text-left p-3 border-b border-gray-800 text-[#aaa] font-medium text-sm">UUID</th>
+                                    <th class="text-left p-3 border-b border-gray-800 text-[#aaa] font-medium text-sm">Username</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fetches-container">
+                                <tr><td colspan="3" class="placeholder text-center p-6 text-gray-500">Connecting to see data fetches...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Combined View -->
+            <div id="combined-view-container" class="hidden bg-dark-card rounded-xl p-5 mb-6 flex-col">
+                 <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-indigo-400">📜</span>
+                        <p class="text-lg font-medium text-white">All Logs (Combined)</p>
+                    </div>
+                    <div>
+                        <span id="combined-count" class="gradient-text font-semibold text-xl">0</span>
+                        <span class="text-[#aaa] text-sm ml-1">total entries</span>
+                    </div>
+                </div>
+                <div class="bg-dark-settings rounded-lg flex-grow overflow-y-auto log-scroller">
+<!-- (Continuing from the previous snippet) -->
+                    <div id="combined-logs-container" class="p-2 space-y-3">
+                        <p class="placeholder text-center p-6 text-gray-500">Switch to Combined View to see all logs...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Control Panel Section -->
+        <div class="bg-dark-card rounded-xl p-5 mb-6">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="text-indigo-400 text-xl">🎮</span>
+                <p class="text-lg font-medium text-white">Control Panel</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label class="block text-[#aaa] text-sm mb-2">View Mode</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center p-2 rounded-lg bg-dark-settings hover:bg-dark-hover transition-colors cursor-pointer">
+                            <input type="radio" name="viewMode" value="split" checked class="mr-2">
+                            Split
+                        </label>
+                        <label class="flex items-center p-2 rounded-lg bg-dark-settings hover:bg-dark-hover transition-colors cursor-pointer">
+                            <input type="radio" name="viewMode" value="combined" class="mr-2">
+                            Combined
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="log-type-filter-group">
+                    <label class="block text-[#aaa] text-sm mb-2">Log Type Filter <span class="text-xs">(Combined View)</span></label>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="flex items-center p-2 rounded-lg bg-dark-settings hover:bg-dark-hover transition-colors cursor-pointer">
+                            <input type="radio" name="logType" value="all" checked class="mr-2">
+                            All
+                        </label>
+                        <label class="flex items-center p-2 rounded-lg bg-dark-settings hover:bg-dark-hover transition-colors cursor-pointer">
+                            <input type="radio" name="logType" value="data_fetch" class="mr-2">
+                            Fetches
+                        </label>
+                        <label class="flex items-center p-2 rounded-lg bg-dark-settings hover:bg-dark-hover transition-colors cursor-pointer">
+                            <input type="radio" name="logType" value="command" class="mr-2">
+                            Commands
+                        </label>
+                    </div>
+                </div>
+                
+                <div>
+                     <label for="limit" class="block text-[#aaa] text-sm mb-2">Log Display Limit</label>
+                     <select id="limit" class="w-full bg-dark-settings text-white border border-gray-700 rounded-lg px-2 py-1.5 text-sm">
+                         <option value="50">50</option>
+                         <option value="100" selected>100</option>
+                         <option value="250">250</option>
+                         <option value="500">500</option>
+                     </select>
+                </div>
+                
+                <div>
+                    <label class="block text-[#aaa] text-sm mb-2">Actions</label>
+                    <button id="clear-all-btn" class="bg-red-800 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg w-full transition-colors">
+                        Clear All Logs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- STATE MANAGEMENT ---
+        const state = {
+            socket: null,
+            displayLimit: 100, // Default display limit
+        };
+
+        // --- DOM ELEMENT REFERENCES ---
+        const DOMElements = {
+            connectBtn: document.getElementById('connect-btn'),
+            statusIndicator: document.getElementById('status-indicator'),
+            connectionStatus: document.getElementById('connection-status'),
+            commandsContainer: document.getElementById('commands-container'),
+            fetchesContainer: document.getElementById('fetches-container'),
+            commandCount: document.getElementById('command-count'),
+            fetchCount: document.getElementById('fetch-count'),
+            clearCommandsBtn: document.getElementById('clear-commands-btn'),
+            clearFetchesBtn: document.getElementById('clear-fetches-btn'),
+        };
+
+        // --- UTILITY FUNCTIONS ---
+        const formatTime = (isoString) => new Date(isoString).toLocaleTimeString();
+        const parseCommand = (cmdStr) => cmdStr.replace(/\s*\(\/[^)]+\)\s*$/, '').replace(/`/g, '').trim();
+        
+        // --- UI UPDATE FUNCTIONS ---
+        function updateConnectionUI(status) {
+            const { connectBtn, statusIndicator, connectionStatus } = DOMElements;
+            statusIndicator.classList.remove('bg-red-500', 'bg-green-500', 'bg-yellow-500', 'animate-pulse');
+
+            switch (status) {
+                case 'connecting':
+                    connectionStatus.textContent = 'Connecting...';
+                    connectionStatus.className = 'font-medium text-yellow-500';
+                    statusIndicator.classList.add('bg-yellow-500', 'animate-pulse');
+                    connectBtn.textContent = 'Connecting...';
+                    connectBtn.disabled = true;
+                    break;
+                case 'open':
+                    connectionStatus.textContent = 'Connected';
+                    connectionStatus.className = 'font-medium text-green-500';
+                    statusIndicator.classList.add('bg-green-500');
+                    connectBtn.textContent = 'Disconnect';
+                    connectBtn.disabled = false;
+                    break;
+                case 'closed':
+                default:
+                    connectionStatus.textContent = 'Disconnected';
+                    connectionStatus.className = 'font-medium text-red-500';
+                    statusIndicator.classList.add('bg-red-500');
+                    connectBtn.textContent = 'Connect';
+                    connectBtn.disabled = false;
+                    break;
+            }
+        }
+        
+        function updateContainerState(container, countElement, entryClass) {
+            const placeholder = container.querySelector('.placeholder, .placeholder-row');
+            const count = container.querySelectorAll(`.${entryClass}`).length;
+            
+            if (placeholder) {
+                placeholder.parentElement.classList.toggle('hidden', count > 0);
+            }
+            countElement.textContent = count;
+        }
+
+        // --- LOG RENDERING ---
+        function addCommandEntry(log, isNew = false) {
+            const container = DOMElements.commandsContainer;
+            if (isNew || container.querySelector('.placeholder')) {
+                const placeholder = container.querySelector('.placeholder');
+                if (placeholder) placeholder.remove();
+            }
+
+            const el = document.createElement('div');
+            el.className = 'log-entry command-entry rounded-lg p-3 bg-dark-hover';
+            if (isNew) el.classList.add('new');
+
+            const user = log.user || { name: 'Unknown User', avatar_url: 'https://cdn.discordapp.com/embed/avatars/0.png' };
+
+            el.innerHTML = `
+                <div class="flex items-start mb-2">
+                    <img src="${user.avatar_url}" alt="${user.name}" class="w-8 h-8 rounded-full mr-2">
+                    <div>
+                        <p class="font-medium text-white">${user.name}</p>
+                        <p class="text-xs text-gray-400">${formatTime(log.timestamp)}</p>
+                    </div>
+                </div>
+                <div class="pl-10">
+                    <div class="bg-dark-bg rounded px-3 py-1.5 text-sm">
+                        <code>${parseCommand(log.command)}</code>
+                    </div>
+                </div>`;
+
+            container.prepend(el);
+            if (isNew) setTimeout(() => el.classList.remove('new'), 3000);
+            updateContainerState(container, DOMElements.commandCount, 'command-entry');
+        }
+
+        function addDataFetchEntry(log, isNew = false) {
+            const tbody = DOMElements.fetchesContainer;
+            if (isNew || tbody.querySelector('.placeholder-row')) {
+                const placeholderRow = tbody.querySelector('.placeholder-row');
+                if (placeholderRow) placeholderRow.parentElement.remove();
+            }
+
+            const row = document.createElement('tr');
+            row.className = 'log-entry fetch-entry border-b border-gray-800 hover:bg-dark-hover';
+            if (isNew) row.classList.add('new');
+
+            row.innerHTML = `
+                <td class="p-3 text-sm">${formatTime(log.timestamp)}</td>
+                <td class="p-3 text-sm font-mono text-xs">${log.uuid || 'N/A'}</td>
+                <td class="p-3 text-sm">${log.username || 'N/A'}</td>`;
+                
+            tbody.prepend(row);
+            if (isNew) setTimeout(() => row.classList.remove('new'), 3000);
+            updateContainerState(tbody, DOMElements.fetchCount, 'fetch-entry');
+        }
+        
+        // --- WEBSOCKET HANDLING ---
+        function connectWebSocket() {
+            if (state.socket && state.socket.readyState === WebSocket.OPEN) return;
+
+            const wsUrl = 'wss://v2.noemt.dev/ws/logs';
+            state.socket = new WebSocket(wsUrl);
+            updateConnectionUI('connecting');
+
+            state.socket.onopen = () => {
+                updateConnectionUI('open');
+                state.socket.send(JSON.stringify({
+                    type: 'get_recent',
+                    log_type: 'all',
+                    limit: state.displayLimit
+                }));
+            };
+
+            state.socket.onclose = () => {
+                state.socket = null;
+                updateConnectionUI('closed');
+            };
+
+            state.socket.onerror = (error) => {
+                console.error('WebSocket Error:', error);
+                // onclose will be called automatically.
+            };
+
+            state.socket.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                
+                switch (message.event) {
+                    case 'recent_data_fetches':
+                        message.data.forEach(log => addDataFetchEntry(log, false));
+                        break;
+                    case 'recent_commands':
+                        message.data.forEach(log => addCommandEntry(log, false));
+                        break;
+                    case 'new_data_fetch':
+                        addDataFetchEntry(message.data, true);
+                        break;
+                    case 'new_command':
+                        addCommandEntry(message.data, true);
+                        break;
+                    default:
+                        console.warn("Received unknown message event:", message.event);
+                }
+            };
+        }
+        
+        function disconnectWebSocket() {
+            if (state.socket) {
+                state.socket.close();
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        DOMElements.connectBtn.addEventListener('click', () => {
+            if (!state.socket || state.socket.readyState === WebSocket.CLOSED) {
+                connectWebSocket();
+            } else {
+                disconnectWebSocket();
+            }
+        });
+        
+        DOMElements.clearCommandsBtn.addEventListener('click', () => {
+            const container = DOMElements.commandsContainer;
+            container.innerHTML = `<p class="placeholder text-center p-6 text-gray-500">Command logs cleared...</p>`;
+            updateContainerState(container, DOMElements.commandCount, 'command-entry');
+        });
+
+        DOMElements.clearFetchesBtn.addEventListener('click', () => {
+            const container = DOMElements.fetchesContainer;
+            container.innerHTML = `<tr><td colspan="3" class="placeholder-row text-center p-6 text-gray-500">Data fetch logs cleared...</td></tr>`;
+            updateContainerState(container, DOMElements.fetchCount, 'fetch-entry');
+        });
+
+        function initialize() {
+            connectWebSocket();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

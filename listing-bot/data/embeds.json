@@ -1,0 +1,67 @@
+{
+    "accounts": [
+       {
+          "title":"Account Information",
+          "color":3447003,
+          "fields":[
+             {
+                "name":"**Rank**",
+                "value":"{rank_emoji}",
+                "inline":false
+             },
+             {
+                "name":"{emojis_JUNGLE_SAPLING} Skill Average",
+                "value":"{skills_skill_average}",
+                "inline":true
+             },
+             {
+                "name":"{emojis_MORT} Catacombs",
+                "value":"{catacombs_skill_level} ({catacombs_skill_exp} XP)",
+                "inline":true
+             },
+             {
+                "name":"\u200b",
+                "value":"\u200b",
+                "inline":true
+             },
+             {
+                "name":"{emojis_BEHEADED_HORROR} Slayers",
+                "value":"{slayer_zombie_level}/{slayer_spider_level}/{slayer_wolf_level}/{slayer_enderman_level}/{slayer_blaze_level}/{slayer_vampire_level}",
+                "inline":true
+             },
+             {
+                "name":"{emojis_SKYBLOCK_LEVEL} Level",
+                "value":"{stats_skyblock_level}",
+                "inline":true
+             },
+             {
+                "name":"\u200b",
+                "value":"\u200b",
+                "inline":true
+             },
+             {
+                "name":"{emojis_BANK_ITEM} Networth",
+                "value":"{networth_total} ({networth_purse} + {networth_bank} Coins)\n{networth_soulbound} Soulbound",
+                "inline":false
+             },
+             {
+                "name":"{emojis_STONE_PICKAXE} HOTM",
+                "value":"{emojis_HEART_OF_THE_MOUNTAIN} Heart of the Mountain: [not available](https://github.com/HypixelDev/PublicAPI/issues/685)\n{emojis_GREEN_DYE} Mithril Powder: {mining_mithril_powder}\n{emojis_PINK_DYE} Gemstone Powder: {mining_gemstone_powder}\n{emojis_LIGHT_BLUE_DYE} Glacite Powder: {mining_glacite_powder}",
+                "inline":false
+             },
+             {
+                "name":":money_with_wings: Price",
+                "value":"{price}$",
+                "inline":false
+             },
+             {
+                "name":":credit_card: Payment Method(s)",
+                "value":"{payment_methods}"
+             }
+          ],
+          "thumbnail":{
+             "url":"https://mc-heads.net/body/anonymous/left"
+          }
+       }
+    ]
+ }

@@ -1,0 +1,15 @@
+py-cord
+aiohttp
+numerize
+Pillow==9.3.0
+numpy
+Augmentor
+chat-exporter==2.5.3
+pyotp
+quart
+quart-cors
+python-dotenv
+aiosqlite
+ujson
+qrcode[pil]
+requests

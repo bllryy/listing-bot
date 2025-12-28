@@ -1,0 +1,93 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+body {
+  background-color: #191919;
+  color: white;
+}
+
+/* Mobile-first responsive improvements */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Mobile specific styles */
+@media (max-width: 640px) {
+  /* Prevent horizontal scroll and ensure full width */
+  * {
+    max-width: 100vw;
+  }
+  
+  /* Font size improvements for mobile */
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.125rem !important; }
+  h4 { font-size: 1rem !important; }
+  
+  /* Button text sizing */
+  button {
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  /* Card content adjustments */
+  .card-title {
+    font-size: 1rem !important;
+  }
+  
+  .stat-number {
+    font-size: 1.125rem !important;
+  }
+  
+  /* Grid adjustments - force single column on mobile */
+  .mobile-single-col {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Padding adjustments for mobile */
+  .mobile-padding {
+    padding: 0.75rem !important;
+  }
+  
+  /* Margin adjustments */
+  .mobile-margin {
+    margin: 0.5rem !important;
+  }
+  
+  /* Container width adjustments */
+  .container-mobile {
+    width: 100% !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  
+  .tablet-padding {
+    padding: 1rem;
+  }
+}
+
+/* Touch-friendly interactive elements */
+button, a, input, select {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+/* Improve text readability on mobile */
+@media (max-width: 640px) {
+  p, span, div {
+    line-height: 1.5;
+  }
+  
+  /* Smaller spacing for mobile */
+  .space-mobile > * + * {
+    margin-top: 0.5rem;
+  }
+}

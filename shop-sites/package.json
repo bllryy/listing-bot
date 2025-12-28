@@ -1,0 +1,64 @@
+{
+  "name": "noemt-shop-platform",
+  "version": "1.0.0",
+  "description": "Modern Discord-style shop platform for gaming accounts and services",
+  "keywords": ["shop", "gaming", "accounts", "discord", "marketplace", "e-commerce"],
+  "author": "noemt.dev",
+  "license": "MIT",
+  "homepage": "https://noemt.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noemt/shop-platform"
+  },
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-regular-svg-icons": "^6.5.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@mui/icons-material": "^6.0.1",
+    "@mui/material": "^6.0.1",
+    "@testing-library/react": "^13.4.0",
+    "eslint-config-react-app": "^7.0.1",
+    "express": "^4.19.2",
+    "js-cookie": "^3.0.5",
+    "prop-types": "^15.8.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.2.1",
+    "react-router-dom": "^6.13.0",
+    "react-scripts": "5.0.1",
+    "tailwindcss": "^3.3.2",
+    "url": "^0.11.1",
+    "util": "^0.12.5",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "set GENERATE_SOURCEMAP=false && react-scripts build",
+    "build:unix": "GENERATE_SOURCEMAP=false react-scripts build && npm run optimize",
+    "optimize": "echo Build optimization complete",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "analyze": "npm run build && npx serve -s build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

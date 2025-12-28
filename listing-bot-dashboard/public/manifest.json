@@ -1,0 +1,15 @@
+{
+  "short_name": "Dashboard",
+  "name": "Dashboard Page",
+  "icons": [
+    {
+      "src": "./assets/icon.webp",
+      "sizes": "300x300",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

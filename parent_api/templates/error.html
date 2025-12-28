@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - {{ error_message }} </title>
+    <link rel="icon" href="https://noemt.dev/assets/icon.webp" type="image/webp">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #181A1B;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Montserrat', sans-serif;
+            text-align: center;
+        }
+        .avatar {
+            width: auto;
+            height: 27vh;
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+        .text-wrapper {
+            margin-bottom: 20px;
+        }
+        .static-text {
+            white-space: nowrap;
+            overflow: hidden;
+            font-size: 4.5em;
+        }
+        .icons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .icons a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            transition: color 0.3s;
+        }
+        .icons a:hover {
+            color: #7289DA;
+        }
+        .icons i {
+            font-size: 4vh;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const title = "Error - {{ error_message }} ";
+            let index = 0;
+
+            setInterval(() => {
+                document.title = title.slice(index) + title.slice(0, index);
+                index = (index + 1) % title.length;
+            }, 500);
+        });
+    </script>
+</head>
+<body>
+    <img class="avatar" src="https://noemt.dev/assets/icon.webp" alt="Avatar">
+    <div class="text-wrapper">
+        <div class="static-text">An error occured</div>
+        <h2>{{ error_message }}</h2>
+    </div>
+    <div class="icons">
+        <a href="https://discord.gg/noms" rel="noopener noreferrer" target="_blank" aria-label="Join our Discord">
+            <i class="fa-brands fa-discord"></i>
+        </a>
+    </div>
+</body>
+</html>

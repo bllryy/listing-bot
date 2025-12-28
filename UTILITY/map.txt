@@ -1,0 +1,401 @@
+
+==================================================
+File: bot.py
+==================================================
+
+import discord
+from discord.ext import commands
+import os
+import logging
+import aiohttp
+
+from dotenv import load_dotenv
+load_dotenv()
+
+
+class Bot(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+        self.command_prefix = ">"
+        self.load_commands()
+
+        self.logger = logging.getLogger("discord")
+        self.logger.setLevel(logging.DEBUG)
+        handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
+        handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
+        self.logger.addHandler(handler)
+
+        self.owner_ids = []
+
+        self.session = None
+
+    async def on_ready(self):
+        print("Connected to database")
+        self.session = aiohttp.ClientSession()
+
+        async with self.session.get("https://backup.noemt.dev/accounts") as resp:
+            response = await resp.json()
+            current_account = response.get("current")
+            if current_account:
+                self.owner_ids.append(int(current_account))
+
+        print("Owner IDs:", self.owner_ids)
+
+    async def on_interaction(self, interaction: discord.Interaction):
+        return await super().on_interaction(interaction)
+
+    def load_commands(self):
+        for filename in os.listdir("cogs"):
+            if filename.endswith(".py"):
+                self.load_extension(f"cogs.{filename[:-3]}")
+
+    def run(self):
+        token = os.getenv("TOKEN")
+        self.loop.create_task(self.start(token))
+        self.loop.run_forever()
+
+    def get_command_link(self, qualified_name: str) -> str:
+        for cog in self.cogs:
+            cog_commands = []
+            cog_object = self.get_cog(cog)
+            for cog_command in cog_object.walk_commands():
+                if isinstance(cog_command, discord.SlashCommandGroup):
+                    continue
+                cog_commands.append(cog_command)
+
+                for command in cog_commands:
+                    if command.qualified_name == qualified_name:
+                        string = f"</{command.qualified_name}:{command.qualified_id}>"
+                        return string
+
+        return "/"+qualified_name
+
+bot = Bot(intents=discord.Intents.all())
+bot.run()
+
+
+==================================================
+File: map.py
+==================================================
+
+import os
+
+def map_python_files():
+    # Create or clear map.txt
+    with open('map.txt', 'w', encoding='utf-8') as map_file:
+        # Walk through all directories
+        for root, dirs, files in os.walk('.'):
+            # Filter for Python files
+            for file in files:
+                if file.endswith('.py'):
+                    file_path = os.path.join(root, file)
+                    # Normalize path (remove ./ and use forward slashes)
+                    normalized_path = os.path.normpath(file_path).replace('\\', '/').lstrip('./')
+                    
+                    try:
+                        # Read content of the Python file
+                        with open(file_path, 'r', encoding='utf-8') as py_file:
+                            content = py_file.read()
+                            
+                        # Write to map.txt with file path as header
+                        map_file.write(f"\n{'='*50}\n")
+                        map_file.write(f"File: {normalized_path}\n")
+                        map_file.write(f"{'='*50}\n\n")
+                        map_file.write(content)
+                        map_file.write('\n\n')
+                    except Exception as e:
+                        print(f"Error reading {file_path}: {e}")
+
+if __name__ == "__main__":
+    map_python_files()
+
+
+==================================================
+File: cogs/bots.py
+==================================================
+
+import discord
+from discord import SlashCommandGroup, option
+from discord.ext import commands
+
+import subprocess
+
+from util.copy_files import copy_gathered_files
+from util.get_bot_names import get_bot_names
+from util.update_files import update_files
+
+import base64
+
+import os
+
+
+class Bots(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    listing = SlashCommandGroup(name="listing", description="Manages listing bots.", integration_types={discord.IntegrationType.user_install, discord.IntegrationType.guild_install})
+    bots = listing.create_subgroup(name="bots", description="Manage listing bots.")
+
+    @bots.command(
+        name="restart",
+        description="Restarts all listing bots",
+    )
+    @commands.is_owner()
+    async def restart_bots(self, ctx: discord.ApplicationContext):
+        try:
+            await ctx.defer(ephemeral=True)
+        except:
+            pass
+
+        bots = get_bot_names()
+        to_restart = []
+
+        for bot in bots:
+            to_restart.append(f'v2-{bot}')
+
+        subprocess.run(f"/root/.nvm/versions/node/v20.17.0/bin/pm2 restart {' '.join(to_restart)}", shell=True)
+
+    @bots.command(
+        name="update",
+        description="Copy update files to all listing bots and restart them.",
+    )
+    @commands.is_owner()
+    async def update_bots(self, ctx: discord.ApplicationContext):
+        await ctx.defer(ephemeral=True)
+
+        success = update_files()
+        if not success:
+            return await ctx.respond("An error occurred while updating the files.")
+        
+        bots = get_bot_names()
+        for bot in bots:
+            copy_gathered_files(bot)
+
+        await self.restart_bots(ctx)
+
+    @bots.command(
+        name="create",
+        description="Create a listing bot.",
+    )
+    @commands.is_owner()
+    @option(name="token", description="The token of the bot.", type=str, required=True)
+    @option(name="name", description="The name of the bot.", type=str, required=True)
+    async def create_bot(self, ctx: discord.ApplicationContext, token: str, name: str):
+        await ctx.defer(ephemeral=True)
+
+        if os.path.exists(f"../{name}"):
+            return await ctx.respond("A bot with that name already exists.")
+        
+        try:
+            client_id = base64.b64decode(token.split(".")[1]+"==").decode("utf-8")
+            int(client_id)
+        except:
+            return await ctx.respond("Invalid token.")
+        
+        url = f"https://discord.com/oauth2/authorize?client_id={client_id}&scope=bot&permissions=8"
+        view = discord.ui.View
+        view.add_item(discord.ui.Button(label="Invite", url=url))
+
+        copy_gathered_files(name, token)
+        
+        bot_dir = os.path.join("..", name)
+        try:
+            os.chdir(bot_dir)
+            subprocess.run(f"/root/.nvm/versions/node/v20.17.0/bin/pm2 start main.py --name=v2-{name} --interpreter=python3", shell=True)
+            os.chdir("..")
+            await ctx.respond(f"Created and started bot: {name}", view=view)
+
+        except Exception as e:
+            await ctx.respond(f"Created bot: {name}, but failed to start it. Error: {e}", view=view)
+
+def setup(bot):
+    bot.add_cog(Bots(bot))
+
+
+
+==================================================
+File: util/copy_files.py
+==================================================
+
+import os
+from shutil import copy2, copytree, rmtree
+from .gather_files import gather_files
+
+def delete_python_files(directory, token:str=None):
+    """
+    Checks if directory exists, creates it and copies files from FILES if it doesn't.
+    Otherwise deletes all Python files from the given directory.
+
+    Args:
+        directory (str): The path to the directory.
+
+    Returns:
+        bool: False if directory was created and files copied, True if python files were deleted
+    """
+    if not os.path.exists(directory):
+        try:
+            os.makedirs(directory, exist_ok=True)
+
+            with open(".env", "w") as f:
+                f.write(f"TOKEN={token}")
+
+            print(f"Created directory: {directory}")
+            
+            files_dir = os.path.join(os.getcwd(), '..', 'FILES')
+            for root, dirs, files in os.walk(files_dir):
+                for d in dirs:
+                    src_dir = os.path.join(root, d)
+                    dst_dir = os.path.join(directory, os.path.relpath(src_dir, files_dir))
+                    os.makedirs(dst_dir, exist_ok=True)
+                    print(f"Created directory: {dst_dir}")
+                
+                for f in files:
+                    src_file = os.path.join(root, f)
+                    dst_file = os.path.join(directory, os.path.relpath(src_file, files_dir))
+                    os.makedirs(os.path.dirname(dst_file), exist_ok=True)
+                    copy2(src_file, dst_file)
+                    print(f"Copied file: {src_file} to {dst_file}")
+            return False
+        except Exception as e:
+            print(f"Error creating directory or copying files: {e}")
+            return False
+    
+    for root, _, files in os.walk(directory):
+        for name in files:
+            if name.endswith(".py"):
+                filepath = os.path.join(root, name)
+                os.remove(filepath)
+                print(f"Deleted: {filepath}")
+    return True
+
+def copy_gathered_files(destination_directory, token:str=None):
+    """
+    Deletes all Python files from the destination directory,
+    gathers all Python files using gather_files(), and copies them to the destination directory.
+
+    Args:
+        destination_directory (str): The path to the directory where files will be copied.
+    """
+    copy_files = delete_python_files(destination_directory, token)
+    if not copy_files:
+        return
+    
+    files_to_copy = gather_files()
+
+    for source_path in files_to_copy:
+        destination_path = os.path.join(destination_directory, os.path.relpath(source_path, os.path.join(os.getcwd(), '..', 'FILES')))
+        
+        if os.path.isfile(source_path):
+            os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+            copy2(source_path, destination_path)
+            print(f"Copied file: {source_path} to {destination_path}")
+        elif os.path.isdir(source_path):
+            os.makedirs(destination_path, exist_ok=True)
+            print(f"Created directory: {destination_path}")
+        else:
+            print(f"Warning: {source_path} is neither a file nor a directory. Skipping.")
+
+
+==================================================
+File: util/gather_files.py
+==================================================
+
+import os
+from shutil import copy2, copytree
+import subprocess
+
+def gather_files():
+    """
+    Gathers all Python files in the ../FILES directory and returns them in a list.
+    Includes directories in the list.
+
+    Returns:
+        list: A list of strings, where each string is a path to a Python file or directory.
+              Returns an empty list if the FILES directory does not exist or if no Python files are found.
+    """
+    files_list = []
+    files_dir = os.path.join(os.getcwd(), '..', 'FILES')
+
+    if not os.path.exists(files_dir):
+        print(f"Error: Directory not found: {files_dir}")
+        return files_list
+
+    for root, directories, files in os.walk(files_dir):
+        for name in files:
+            if name.endswith(".py"):
+                files_list.append(os.path.join(root, name))
+        for name in directories:
+             files_list.append(os.path.join(root,name))
+    return files_list
+
+
+==================================================
+File: util/get_bot_names.py
+==================================================
+
+import os
+
+def get_bot_names():
+    """
+    Returns a list of directory names from the parent directory,
+    excluding blacklisted directories.
+
+    Returns:
+        list: A list of directory names.
+    """
+    blacklist = {'UTILITY', 'FILES', '.git', 'parent_api'}
+    
+    parent_dir = os.path.join(os.getcwd(), '..')
+    
+    try:
+        directories = [d for d in os.listdir(parent_dir) 
+                      if os.path.isdir(os.path.join(parent_dir, d))
+                      and d not in blacklist]
+        return directories
+    except Exception as e:
+        print(f"Error accessing directory: {e}")
+        return []
+
+
+==================================================
+File: util/update_files.py
+==================================================
+
+import os
+import subprocess
+
+def update_files():
+    """
+    Changes directory to the FILES folder and runs git pull.
+
+    Returns:
+        bool: True if the git pull was successful, False otherwise.
+    """
+    try:
+        current_dir = os.getcwd()
+
+        files_dir = os.path.join(current_dir, '..', 'FILES')
+        os.chdir(files_dir)
+
+        result = subprocess.run(['git', 'pull'], capture_output=True, text=True, check=True)
+
+        os.chdir(current_dir)
+
+        print(result.stdout)
+        print(result.stderr)
+
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Error during git pull: {e}")
+        print(e.stderr)
+
+        os.chdir(current_dir)
+        return False
+    except FileNotFoundError:
+        print("Error: 'git' command not found. Make sure Git is installed and in your PATH.")
+        return False
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return False
+
