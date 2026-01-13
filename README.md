@@ -1,43 +1,6 @@
 # Listing Bot
 
-A comprehensive multi-tenant Discord marketplace platform for selling digital items (gaming accounts, profiles, and more) with web dashboards, seller management, and integrated payment systems.
-
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![Node.js](https://img.shields.io/badge/Node.js-16+-green.svg)
-![Discord](https://img.shields.io/badge/Discord-py--cord-7289da.svg)
-![React](https://img.shields.io/badge/React-18-61dafb.svg)
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-  - [Step 1: Clone the Repository](#step-1-clone-the-repository)
-  - [Step 2: Set Up the Discord Bot](#step-2-set-up-the-discord-bot)
-  - [Step 3: Create a Discord Application](#step-3-create-a-discord-application)
-  - [Step 4: Set Up the Parent API](#step-4-set-up-the-parent-api)
-  - [Step 5: Set Up the Web Dashboards](#step-5-set-up-the-web-dashboards)
-- [Running the Application](#running-the-application)
-- [Configuration](#configuration)
-- [Project Structure](#project-structure)
-- [API Documentation](#api-documentation)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Overview
-
-Listing Bot is a complete solution for running a digital marketplace through Discord. It allows you to:
-
-- List and sell digital items (gaming accounts, profiles, alts)
-- Manage sellers with individual permissions
-- Process payments and track transactions
-- Provide customer support through a ticket system
-- Collect and display customer reviews (vouches)
-- Run a public-facing shop website
-- Monitor everything through web dashboards
+A multi-tenant Discord marketplace platform for selling digital items (gaming accounts, profiles, and more) with web dashboards, seller management, and integrated payment systems.
 
 ## Architecture
 
@@ -71,7 +34,7 @@ Listing Bot is a complete solution for running a digital marketplace through Dis
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## Features
+## Feature
 
 | Feature | Description |
 |---------|-------------|
@@ -86,40 +49,6 @@ Listing Bot is a complete solution for running a digital marketplace through Dis
 | **Browser Fingerprinting** | Advanced fraud detection for user authentication |
 | **Real-time Logging** | WebSocket-based live command and data fetch logging |
 | **OAuth2 Authentication** | Secure Discord-based authentication for all dashboards |
-
-## Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- **Python 3.8 or higher** - [Download Python](https://www.python.org/downloads/)
-- **Node.js 16 or higher** - [Download Node.js](https://nodejs.org/)
-- **npm** (comes with Node.js)
-- **Git** - [Download Git](https://git-scm.com/downloads/)
-- **A Discord Account** - [Create Discord Account](https://discord.com/)
-
-### Verify Installation
-
-Open a terminal and run:
-
-```bash
-python --version
-node --version
-npm --version
-git --version
-```
-
-All commands should return version numbers without errors.
-
-## Installation
-
-### Step 1: Clone the Repository
-
-```bash
-git clone [https://github.com/your-username/Listing-Bot.git](https://github.com/bllryy/listing-bot.git)
-cd Listing-Bot
-```
-
-### Step 2: Set Up the Discord Bot
 
 - Check the docker help files
 
@@ -291,8 +220,6 @@ You'll need to run multiple services. Open separate terminal windows for each:
 cd listing-bot
 
 # Activate virtual environment
-# Windows:
-venv\Scripts\activate
 # macOS/Linux:
 source venv/bin/activate
 
