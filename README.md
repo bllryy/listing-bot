@@ -470,37 +470,3 @@ Each bot exposes its own API on its assigned port:
 | `/listed/items` | GET | All listed items |
 | `/auth/users` | GET | Authorized users |
 | `/seller/get/accounts` | GET | Seller's listed items |
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-<<<<<<< Updated upstream
-Made with care by [noemt.dev](https://noemt.dev)
-
-todo: api key information
-
-these keys should be set to the same:
-listing-bot\api\auth_utils.py
-INTERNAL_API_KEY in parent_api\api.py
-
-APP_API_KEY in parent_api\api.py (from the env)
-listing-bot\bot\util\attachment_handler.py
-
-you do require a hypixel api key from their developer dashboard
-enter it here:
-listing-bot\bot\util\constants.py
-
-seperate process info:
-you need to run an instance of https://github.com/noemtdotdev/skyblock-wrapper
-then, enter the port (and ip if you want to test locally on the same codebase) into listing-bot\bot\util\fetch.py
-(this also requires a hypixel api key)
-
-the api key you use for authentication there needs to be entered in listing-bot\bot\util\fetch.py
-
-replace ALL localhost with the actual servers ip that you are running on to make 100% sure that it runs (it should with localhost but you can never be sure enough)
-=======
-Made by [noemt.dev](https://noemt.dev), README.md by [ash](https://github.com/auradoescoding)
->>>>>>> Stashed changes
