@@ -471,46 +471,6 @@ Each bot exposes its own API on its assigned port:
 | `/auth/users` | GET | Authorized users |
 | `/seller/get/accounts` | GET | Seller's listed items |
 
-## Troubleshooting
-
-### Bot won't start
-
-1. **Check Python version**: Ensure Python 3.8+ is installed
-2. **Check virtual environment**: Make sure venv is activated
-3. **Verify token**: Check that `.env` contains a valid bot token
-4. **Check intents**: Ensure all privileged intents are enabled in Discord Developer Portal
-
-### "Bot is not responding" in dashboard
-
-1. **Check if bot is running**: Verify the bot process is active
-2. **Check ports.json**: Ensure the bot's port is correctly registered
-3. **Check firewall**: Ensure the port isn't blocked
-
-### OAuth2 authentication fails
-
-1. **Check redirect URI**: Must match exactly in Discord Developer Portal
-2. **Check client credentials**: Verify Client ID and Secret in `api.py`
-3. **Check cookies**: Ensure cookies are enabled in your browser
-
-### Database errors
-
-1. **Delete and recreate**: Remove `data/bot.db` to start fresh (data will be lost)
-2. **Check permissions**: Ensure write access to the `data/` directory
-
-### npm install fails
-
-1. **Clear cache**: Run `npm cache clean --force`
-2. **Delete node_modules**: Remove and reinstall: `rm -rf node_modules && npm install`
-3. **Check Node version**: Ensure Node.js 16+ is installed
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
