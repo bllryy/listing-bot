@@ -139,25 +139,15 @@ SESSION_LIFETIME_HOURS=24
 
 Generate a secure API key (you can use any random string, e.g., from https://randomkeygen.com/).
 
-**Important:** Replace `yourdomain.com` with your actual domain or use `http://127.0.0.1:7000` for local development.
-
 #### 4.4 Create Ports Configuration
 
 Create a `ports.json` file in the `parent_api/` directory:
 
-```json
-{}
-```
-
 This file will be automatically populated when bots start.
 
-#### 4.5 Create Custom Domains File (Optional)
+#### 4.5 Create Custom Domains File
 
 If you want to use custom domains, create `custom_domains.json`:
-
-```json
-[]
-```
 
 ### Step 5: Set Up the Web Dashboards
 
@@ -236,37 +226,14 @@ cd parent_api
 uvicorn api:app --host 0.0.0.0 --port 7000 --reload
 ```
 
-#### Terminal 3: Dashboard (optional, for development)
+#### Terminal 3: Dashboard
 
 ```bash
 cd listing-bot-dashboard
 npm start
 ```
 
-#### Terminal 4: Shop Site (optional, for development)
-
-```bash
-cd shop-sites
-npm start
-```
-
-### Windows Quick Start
-
-Use the provided batch file:
-
-```bash
-cd listing-bot
-launch.bat
-```
-
 ### Production Deployment
-
-For production, you should:
-
-1. Build the React apps: `npm run build` in each frontend directory
-2. Use a process manager like PM2 or systemd
-3. Set up a reverse proxy (nginx/Caddy) for HTTPS
-4. Use environment variables for sensitive data
 
 Example with PM2:
 
